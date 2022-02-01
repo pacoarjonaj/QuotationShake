@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">QuotationShake</string>
+
+    <string name="quotationShake">Quotation Shake</string>
+    <string name="randomQuotations">Random Quotations</string>
+    <string name="getQuotations">Get Quotations</string>
+    <string name="favQuotations">Favourite quotations</string>
+    <string name="settings">Settings</string>
+    <string name="about">About</string>
 </resources>
