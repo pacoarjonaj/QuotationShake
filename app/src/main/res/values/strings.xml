@@ -14,5 +14,7 @@
     <string name="reqSettings">Request quotations using the selected HTTP method</string>
     <string name="GETSett">GET</string>
     <string name="POSTSett">POST</string>
+    <string name="authorInfo">Author Info</string>
+
 
 </resources>
