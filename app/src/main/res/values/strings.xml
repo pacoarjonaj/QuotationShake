@@ -8,4 +8,11 @@
     <string name="settings">Settings</string>
     <string name="about">About</string>
     <string name="aboutText">“Quotation Shake by\n\n Francisco Arjona Jimenez \n\n arjonapaco0@gmail.com \n\nDeveloped for DADM 2022”)</string>
+    <string name="userSettings">Name that identifies the user</string>
+    <string name="insertSettings">Insert your name</string>
+    <string name="getSettings">Get quotations in the selected language</string>
+    <string name="reqSettings">Request quotations using the selected HTTP method</string>
+    <string name="GETSett">GET</string>
+    <string name="POSTSett">POST</string>
+
 </resources>
