@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">QuotationShake</string>
+    <string name="randomQuotations">Citas Random</string>
+    <string name="getQuotations">Obtener Citas</string>
+    <string name="favQuotations">Citas favoritas</string>
+    <string name="settings">Ajustes</string>
+    <string name="about">"Sobre"</string>
+    <string name="userSettings">Nombre de usuario</string>
+    <string name="insertSettings">Introduce tu nombre</string>
+    <string name="getSettings">Traducir las citas seleccionadas</string>
+    <string name="reqSettings">Para la obtencion de citas se usa el metodo HTTP</string>
+    <string name="authorInfo">Informacion del autor</string>
+    <string name="sampleQuo">Esta es una simple cita</string>
+    <string name="sampleAut">Este es un simple autor</string>
+</resources>
