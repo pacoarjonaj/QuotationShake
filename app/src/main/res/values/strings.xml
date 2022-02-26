@@ -18,6 +18,9 @@
     <string name="sampleQuo">This is a sample quotation</string>
     <string name="sampleAut">This is a sample author</string>
     <string name="hello" translatable="false">Hello%1s!\nPress Refresh to get a new quotation</string>
+    <string name="english">English</string>
+    <string name="russian">Russian</string>
+    <string name="noName">No author</string>
 
 
 

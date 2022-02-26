@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="appStyle">
+        <item name="android:textAppearance">@android:style/TextAppearance.Large</item>
+        <item name="android:color">#DD969C</item>
+    </style>
+</resources>

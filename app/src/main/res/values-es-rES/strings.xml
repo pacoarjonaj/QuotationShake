@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">QuotationShake</string>
     <string name="randomQuotations">Citas Random</string>
     <string name="getQuotations">Obtener Citas</string>
     <string name="favQuotations">Citas favoritas</string>
@@ -13,4 +12,7 @@
     <string name="authorInfo">Informacion del autor</string>
     <string name="sampleQuo">Esta es una simple cita</string>
     <string name="sampleAut">Este es un simple autor</string>
+    <string name="english">Ingles</string>
+    <string name="russian">Ruso</string>
+    <string name="noName">No tiene autor</string>
 </resources>
