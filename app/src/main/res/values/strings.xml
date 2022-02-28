@@ -21,6 +21,11 @@
     <string name="english">English</string>
     <string name="russian">Russian</string>
     <string name="noName">No author</string>
+    <string name="userName">User name</string>
+    <string name="obatiningQuo">Obtaining quotations</string>
+    <string name="chooseLanguage">Quotations language</string>
+    <string name="httpRequests">HTTP requests</string>
+    <string name="key" translatable="false">quotationKey</string>
 
 
 

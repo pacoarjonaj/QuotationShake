@@ -5,4 +5,9 @@
         <item>@string/russian</item>
     </string-array>
 
+    <string-array name="arrayHttp">
+        <item>@string/GETSett</item>
+        <item>@string/POSTSett</item>
+    </string-array>
+
 </resources>

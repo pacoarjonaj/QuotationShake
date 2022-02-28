@@ -15,4 +15,8 @@
     <string name="english">Ingles</string>
     <string name="russian">Ruso</string>
     <string name="noName">No tiene autor</string>
+    <string name="userName">Nombre de usuario</string>
+    <string name="obatiningQuo">Obtener citas</string>
+    <string name="chooseLanguage">Elegir lenguaje</string>
+    <string name="httpRequests">Peticiones HTTP</string>
 </resources>

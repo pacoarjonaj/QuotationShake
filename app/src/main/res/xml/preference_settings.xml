@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:key="@string/key"
+        android:title="@string/userName"
+        >
+    </EditTextPreference>
+
+    <PreferenceCategory
+        android:title="@string/obatiningQuo">
+        <ListPreference
+            android:key="@string/chooseLanguage"
+            android:entries="@array/arrayLanguages"
+            android:entryValues="@array/arrayLanguages"
+            android:title="@string/chooseLanguage">
+        </ListPreference>
+
+        <ListPreference
+            android:key="@string/httpRequests"
+            android:entries="@array/arrayHttp"
+            android:entryValues="@array/arrayHttp"
+            android:title="@string/httpRequests">
+
+        </ListPreference>
+    </PreferenceCategory>
+
+</PreferenceScreen>
