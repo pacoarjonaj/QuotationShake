@@ -2,12 +2,15 @@ package lab.dadm.quotationshake;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -20,6 +23,12 @@ public class QuotationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quotation);
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String username = prefs.getString(getString(R.string.key), getString(R.string.noRegisteredUser));
+        String hello = getString(R.string.hello,username);
+
+        TextView aux = findViewById(R.id.textView6);
+        aux.setText(hello);
     }
 
     @Override
