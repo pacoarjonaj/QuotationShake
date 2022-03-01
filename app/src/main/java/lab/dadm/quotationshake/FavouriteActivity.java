@@ -25,12 +25,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import adapter.QuotationList;
+import databases.QuotationDataBase;
 import model.Quotation;
 
 public class FavouriteActivity extends AppCompatActivity {
 
     QuotationList adapter;
-     boolean isVisible = true;
+    boolean isVisible = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,12 +91,14 @@ public class FavouriteActivity extends AppCompatActivity {
         recycler.setLayoutManager(manager);
         recycler.addItemDecoration(itemDecoration);
 
-        adapter = new QuotationList(getMockQuotations(),listener,longListener);
+        List<Quotation> listQuotations = QuotationDataBase.getInstance(this).quotationDAO().getAllQuotations(); // Obtenemos desde la bbdd
+        adapter = new QuotationList(listQuotations,listener,longListener);
         isVisible = adapter.getItemCount() > 0;
         recycler.setAdapter(adapter);
 
     }
 
+    /*
     public List<Quotation> getMockQuotations(){
         List<Quotation> listaFake = new ArrayList<>();
         Quotation quotationFake = new Quotation("Esta es una cita fake","Snoop Dogg");
@@ -113,6 +116,8 @@ public class FavouriteActivity extends AppCompatActivity {
 
         return listaFake;
     }
+    */
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

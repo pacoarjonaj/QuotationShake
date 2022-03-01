@@ -10,8 +10,8 @@
     <string name="getSettings">Traducir las citas seleccionadas</string>
     <string name="reqSettings">Para la obtencion de citas se usa el metodo HTTP</string>
     <string name="authorInfo">Informacion del autor</string>
-    <string name="sampleQuo">Esta es una simple cita</string>
-    <string name="sampleAut">Este es un simple autor</string>
+    <string name="sampleQuo">Cita %1$d</string>
+    <string name="sampleAut">Autor %1$d</string>
     <string name="english">Ingles</string>
     <string name="russian">Ruso</string>
     <string name="noName">No tiene autor</string>

@@ -15,8 +15,8 @@
     <string name="GETSett" translatable="false">GET</string>
     <string name="POSTSett" translatable="false">POST</string>
     <string name="authorInfo">Author Info</string>
-    <string name="sampleQuo">This is a sample quotation</string>
-    <string name="sampleAut">This is a sample author</string>
+    <string name="sampleQuo">Sample Quotation %1$d</string>
+    <string name="sampleAut">Sample Author %1$d</string>
     <string name="hello" translatable="false">Hello %1s!\nPress Refresh to get a new quotation</string>
     <string name="english">English</string>
     <string name="russian">Russian</string>
