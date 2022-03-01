@@ -31,7 +31,7 @@ import model.Quotation;
 public class FavouriteActivity extends AppCompatActivity {
 
     QuotationList adapter;
-    boolean isVisible = true;
+    boolean isVisible;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +63,7 @@ public class FavouriteActivity extends AppCompatActivity {
                 builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+                        QuotationDataBase.getInstance(FavouriteActivity.this).quotationDAO().deleteQuote(adapter.getQuoation(position));
                         adapter.removeListElement(position);
 
                         if(adapter.getItemCount() == 0){
@@ -135,6 +136,7 @@ public class FavouriteActivity extends AppCompatActivity {
         switch(item.getItemId()){
             case R.id.itemClearAll:
                 adapter.clearAllElements();
+                QuotationDataBase.getInstance(this).quotationDAO().deleteAllQuote();
                 isVisible = false;
                 invalidateOptionsMenu();
                 return true;

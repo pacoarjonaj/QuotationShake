@@ -12,10 +12,10 @@ import model.Quotation;
 @Dao
 public interface QuotationDAO {
     @Insert
-    public void insertQuote();
+    public void insertQuote(Quotation quotation);
 
     @Delete
-    public void deleteQuote();
+    public void deleteQuote(Quotation quotation);
 
     @Query("SELECT * FROM Quotation")
     public List<Quotation> getAllQuotations();

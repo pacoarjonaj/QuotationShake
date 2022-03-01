@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import databases.QuotationDataBase;
 import model.Quotation;
 
 public class QuotationActivity extends AppCompatActivity {
@@ -22,6 +23,7 @@ public class QuotationActivity extends AppCompatActivity {
     boolean addIsVisbile = true;
     String hello;
     String quotationPhrase;
+    Quotation quotationFake = new Quotation("prueba","yo");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,13 +69,26 @@ public class QuotationActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()){
             case R.id.itemAdd:
+                QuotationDataBase.getInstance(this).quotationDAO().insertQuote(quotationFake);
+                addIsVisbile = false;
+                invalidateOptionsMenu();
                 return true;
             case R.id.itemRefresh:
-                Quotation quotation = new Quotation("prueba","yo");
+
+                if(QuotationDataBase.getInstance(this).quotationDAO().getQuote(quotationFake.getQuoteText()) == null){
+                    addIsVisbile = true;
+                    invalidateOptionsMenu();
+                }else{
+                    addIsVisbile = false;
+                    invalidateOptionsMenu();
+                }
+
                 final TextView textView = findViewById(R.id.textView6);
-                quotationPhrase = "Cita " + numQuotations + ": " + quotation.getQuoteText() + " Autor " + numQuotations + ": " + quotation.quoteAuthor;
+                quotationPhrase = "Cita " + numQuotations + ": " + quotationFake.getQuoteText() + " Autor " + numQuotations + ": " + quotationFake.quoteAuthor;
                 textView.setText(quotationPhrase);
+
                 numQuotations++;
+
                 return true;
             default:
                 return true;

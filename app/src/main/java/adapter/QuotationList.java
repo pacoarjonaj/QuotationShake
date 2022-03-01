@@ -49,6 +49,10 @@ public class QuotationList extends RecyclerView.Adapter<QuotationList.ViewHolder
         notifyItemRemoved(pos);
     }
 
+    public Quotation getQuoation(int pos){
+        return listQuotation.get(pos);
+    }
+
     public void clearAllElements(){
         listQuotation.clear();
         notifyDataSetChanged();
