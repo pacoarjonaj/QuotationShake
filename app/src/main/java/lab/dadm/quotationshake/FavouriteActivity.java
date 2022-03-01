@@ -63,9 +63,15 @@ public class FavouriteActivity extends AppCompatActivity {
                 builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        QuotationDataBase.getInstance(FavouriteActivity.this).quotationDAO().deleteQuote(adapter.getQuoation(position));
-                        adapter.removeListElement(position);
 
+                       new Thread(new Runnable() {
+                           @Override
+                           public void run() {
+                               QuotationDataBase.getInstance(FavouriteActivity.this).quotationDAO().deleteQuote(adapter.getQuoation(position));
+                           }
+                       }).start();
+
+                        adapter.removeListElement(position);
                         if(adapter.getItemCount() == 0){
                             isVisible = false;
                             invalidateOptionsMenu();
@@ -99,26 +105,6 @@ public class FavouriteActivity extends AppCompatActivity {
 
     }
 
-    /*
-    public List<Quotation> getMockQuotations(){
-        List<Quotation> listaFake = new ArrayList<>();
-        Quotation quotationFake = new Quotation("Esta es una cita fake","Snoop Dogg");
-
-        listaFake.add(quotationFake);
-        listaFake.add(quotationFake);
-        listaFake.add(quotationFake);
-        listaFake.add(quotationFake);
-        listaFake.add(quotationFake);
-        listaFake.add(quotationFake);
-        listaFake.add(quotationFake);
-        listaFake.add(quotationFake);
-        listaFake.add(quotationFake);
-        listaFake.add(quotationFake);
-
-        return listaFake;
-    }
-    */
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -135,10 +121,18 @@ public class FavouriteActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()){
             case R.id.itemClearAll:
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        QuotationDataBase.getInstance(FavouriteActivity.this).quotationDAO().deleteAllQuote();
+                    }
+                }).start();
+
                 adapter.clearAllElements();
-                QuotationDataBase.getInstance(this).quotationDAO().deleteAllQuote();
                 isVisible = false;
                 invalidateOptionsMenu();
+
                 return true;
             default:
                 return true;

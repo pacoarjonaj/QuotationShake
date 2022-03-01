@@ -69,9 +69,17 @@ public class QuotationActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()){
             case R.id.itemAdd:
-                QuotationDataBase.getInstance(this).quotationDAO().insertQuote(quotationFake);
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        QuotationDataBase.getInstance(QuotationActivity.this).quotationDAO().insertQuote(quotationFake);
+                    }
+                }).start();
+
                 addIsVisbile = false;
                 invalidateOptionsMenu();
+
                 return true;
             case R.id.itemRefresh:
 
