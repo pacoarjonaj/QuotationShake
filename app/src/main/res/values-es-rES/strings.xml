@@ -20,4 +20,6 @@
     <string name="chooseLanguage">Elegir lenguaje</string>
     <string name="httpRequests">Peticiones HTTP</string>
     <string name="noRegisteredUser">Sin Nombre</string>
+    <string name="notFound">No es posible obtener la cita</string>
+    <string name="connectionError">Error de conexion</string>
 </resources>

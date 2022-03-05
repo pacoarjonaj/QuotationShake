@@ -6,6 +6,11 @@ import androidx.preference.PreferenceManager;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -13,17 +18,26 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import databases.QuotationDataBase;
 import model.Quotation;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import webservices.QuotationRetrofitInterface;
 
 public class QuotationActivity extends AppCompatActivity {
 
-    int numQuotations = 0;
-    boolean addIsVisbile = true;
+    boolean addIsVisible;
+    boolean refreshIsVisible;
+    boolean progressbarIsVisible;
     String hello;
     String quotationPhrase;
-    Quotation quotationFake = new Quotation("prueba","yo");
+    Quotation quotation;
+    QuotationRetrofitInterface retrofitInterface;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,8 +47,9 @@ public class QuotationActivity extends AppCompatActivity {
         if(savedInstanceState != null){
             hello = savedInstanceState.getString(getString(R.string.key));
             quotationPhrase = savedInstanceState.getString("phraseKey");
-            numQuotations = savedInstanceState.getInt("numQuotes");
-            addIsVisbile = savedInstanceState.getBoolean("visibleAdd");
+            addIsVisible = savedInstanceState.getBoolean("visibleAdd");
+            refreshIsVisible = savedInstanceState.getBoolean("visibleRefresh");
+            progressbarIsVisible = savedInstanceState.getBoolean("visibleProgressBar");
         }else{
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
             String username = prefs.getString(getString(R.string.key), getString(R.string.noRegisteredUser));
@@ -43,6 +58,14 @@ public class QuotationActivity extends AppCompatActivity {
 
         TextView aux = findViewById(R.id.textView6);
         aux.setText(hello);
+        hideAllOptions();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.forismatic.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        retrofitInterface = retrofit.create(QuotationRetrofitInterface.class);
 
     }
 
@@ -51,8 +74,15 @@ public class QuotationActivity extends AppCompatActivity {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.quoation_actionbar,menu);
 
-        MenuItem item = menu.findItem(R.id.itemAdd);
-        item.setVisible(addIsVisbile);
+        MenuItem add = menu.findItem(R.id.itemAdd);
+        add.setVisible(addIsVisible);
+
+        MenuItem refresh = menu.findItem(R.id.itemRefresh);
+        refresh.setVisible(refreshIsVisible);
+
+        MenuItem progressBar = menu.findItem(R.id.progressBar);
+        progressBar.setVisible(refreshIsVisible);
+
         return true;
     }
 
@@ -61,8 +91,9 @@ public class QuotationActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         outState.putString(getString(R.string.key),hello);
         outState.putString("phraseKey",quotationPhrase);
-        outState.putInt("numQuotes",numQuotations);
-        outState.putBoolean("visibleAdd",addIsVisbile);
+        outState.putBoolean("visibleAdd",addIsVisible);
+        outState.putBoolean("visibleRefresh",refreshIsVisible);
+        outState.putBoolean("visibleProgressBar",progressbarIsVisible);
     }
 
     @Override
@@ -73,42 +104,98 @@ public class QuotationActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        QuotationDataBase.getInstance(QuotationActivity.this).quotationDAO().insertQuote(quotationFake);
+                        QuotationDataBase.getInstance(QuotationActivity.this).quotationDAO().insertQuote(quotation);
                     }
                 }).start();
 
-                addIsVisbile = false;
+                addIsVisible = false;
                 invalidateOptionsMenu();
 
                 return true;
             case R.id.itemRefresh:
 
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Quotation aux = QuotationDataBase.getInstance(QuotationActivity.this).quotationDAO().getQuote(quotationFake.getQuoteText());
+                if(isConnected()){
+                    Call<Quotation> call = retrofitInterface.getCurrentQuotation("english");
 
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if(aux == null){
-                                    addIsVisbile = true;
-                                }else addIsVisbile = false;
-                                invalidateOptionsMenu();
-                            }
-                        });
-                    }
-                }).start();
+                    call.enqueue(new Callback<Quotation>() {
+                        @Override
+                        public void onResponse(Call<Quotation> call, Response<Quotation> response) {
+                            displayQuotation(response.body());
+                        }
+
+                        @Override
+                        public void onFailure(Call<Quotation> call, Throwable t) {
+                            Toast.makeText(QuotationActivity.this, R.string.notFound,Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }else{
+                    Toast.makeText(QuotationActivity.this, R.string.connectionError,Toast.LENGTH_SHORT).show();
+                }
 
                 final TextView textView = findViewById(R.id.textView6);
-                quotationPhrase = "Cita " + numQuotations + ": " + quotationFake.getQuoteText() + " Autor " + numQuotations + ": " + quotationFake.quoteAuthor;
+                quotationPhrase = "Cita " + ": " + quotation.getQuoteText() + " Autor " + ": " + quotation.quoteAuthor;
                 textView.setText(quotationPhrase);
-
-                numQuotations++;
 
                 return true;
             default:
                 return true;
         }
+    }
+
+    public void displayQuotation(Quotation quot){
+        quotation.setQuoteText(quot.quoteText);
+        quotation.setQuoteAuthor(quot.quoteAuthor);
+
+        if(quot != null){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Quotation aux = QuotationDataBase.getInstance(QuotationActivity.this).quotationDAO().getQuote(quotation.getQuoteText());
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(aux == null){
+                                addIsVisible = true;
+                            }else addIsVisible = false;
+
+                            progressbarIsVisible = false;
+                            invalidateOptionsMenu();
+                        }
+                    });
+                }
+            }).start();
+        }else{
+            Toast.makeText(QuotationActivity.this, R.string.notFound, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void hideAllOptions(){
+        addIsVisible = false;
+        refreshIsVisible = false;
+        progressbarIsVisible = true;
+        invalidateOptionsMenu();
+    }
+
+    public boolean isConnected(){
+        boolean result = false;
+
+        ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+
+        if(Build.VERSION.SDK_INT > 22){
+            final Network activeNetwork = manager.getActiveNetwork();
+
+            if(activeNetwork != null){
+                final NetworkCapabilities networkCapabilities = manager.getNetworkCapabilities(activeNetwork);
+                result = networkCapabilities != null && (
+                        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI));
+            }
+        }else{
+            NetworkInfo info = manager.getActiveNetworkInfo();
+            result = ((info != null) && (info.isConnected()));
+        }
+
+        return result;
     }
 }

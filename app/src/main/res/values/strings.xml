@@ -27,6 +27,8 @@
     <string name="httpRequests">HTTP requests</string>
     <string name="key" translatable="false">quotationKey</string>
     <string name="noRegisteredUser">Nameless One</string>
+    <string name="notFound">Not possible to get the Quote</string>
+    <string name="connectionError">Connection Error</string>
 
 
 
