@@ -44,6 +44,11 @@ public class QuotationList extends RecyclerView.Adapter<QuotationList.ViewHolder
         return listQuotation.size();
     }
 
+    public void addFavouriteList(List<Quotation> list){
+        listQuotation.addAll(list);
+        notifyDataSetChanged();
+    }
+
     public void removeListElement(int pos){
         listQuotation.remove(pos);
         notifyItemRemoved(pos);

@@ -83,13 +83,22 @@ public class QuotationActivity extends AppCompatActivity {
                 return true;
             case R.id.itemRefresh:
 
-                if(QuotationDataBase.getInstance(this).quotationDAO().getQuote(quotationFake.getQuoteText()) == null){
-                    addIsVisbile = true;
-                    invalidateOptionsMenu();
-                }else{
-                    addIsVisbile = false;
-                    invalidateOptionsMenu();
-                }
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Quotation aux = QuotationDataBase.getInstance(QuotationActivity.this).quotationDAO().getQuote(quotationFake.getQuoteText());
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if(aux == null){
+                                    addIsVisbile = true;
+                                }else addIsVisbile = false;
+                                invalidateOptionsMenu();
+                            }
+                        });
+                    }
+                }).start();
 
                 final TextView textView = findViewById(R.id.textView6);
                 quotationPhrase = "Cita " + numQuotations + ": " + quotationFake.getQuoteText() + " Autor " + numQuotations + ": " + quotationFake.quoteAuthor;

@@ -27,11 +27,22 @@ import java.util.List;
 import adapter.QuotationList;
 import databases.QuotationDataBase;
 import model.Quotation;
+import thread.FavouriteThread;
 
 public class FavouriteActivity extends AppCompatActivity {
 
     QuotationList adapter;
     boolean isVisible;
+
+    public void addFavList(List<Quotation> list){
+        adapter.addFavouriteList(list);
+
+        if(list.size() > 0){
+            isVisible = true;
+            invalidateOptionsMenu();
+        }
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,16 +79,24 @@ public class FavouriteActivity extends AppCompatActivity {
                            @Override
                            public void run() {
                                QuotationDataBase.getInstance(FavouriteActivity.this).quotationDAO().deleteQuote(adapter.getQuoation(position));
+
+                               runOnUiThread(new Runnable() {
+                                   @Override
+                                   public void run() {
+                                       adapter.removeListElement(position);
+                                       if(adapter.getItemCount() == 0){
+                                           isVisible = false;
+                                       }else isVisible = true;
+
+                                       invalidateOptionsMenu();
+                                   }
+                               });
+
                            }
                        }).start();
-
-                        adapter.removeListElement(position);
-                        if(adapter.getItemCount() == 0){
-                            isVisible = false;
-                            invalidateOptionsMenu();
-                        }else isVisible = true;
                     }
                 });
+
                 builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -98,7 +117,7 @@ public class FavouriteActivity extends AppCompatActivity {
         recycler.setLayoutManager(manager);
         recycler.addItemDecoration(itemDecoration);
 
-        List<Quotation> listQuotations = QuotationDataBase.getInstance(this).quotationDAO().getAllQuotations(); // Obtenemos desde la bbdd
+        List<Quotation> listQuotations = new ArrayList<>();
         adapter = new QuotationList(listQuotations,listener,longListener);
         isVisible = adapter.getItemCount() > 0;
         recycler.setAdapter(adapter);
@@ -137,5 +156,12 @@ public class FavouriteActivity extends AppCompatActivity {
             default:
                 return true;
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        FavouriteThread thread = new FavouriteThread(FavouriteActivity.this);
+        thread.start();
     }
 }
