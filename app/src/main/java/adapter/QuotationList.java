@@ -45,6 +45,7 @@ public class QuotationList extends RecyclerView.Adapter<QuotationList.ViewHolder
     }
 
     public void addFavouriteList(List<Quotation> list){
+        listQuotation.clear();
         listQuotation.addAll(list);
         notifyDataSetChanged();
     }

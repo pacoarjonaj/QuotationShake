@@ -17,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,16 +28,16 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import thread.QuotationThread;
 import webservices.QuotationRetrofitInterface;
 
 public class QuotationActivity extends AppCompatActivity {
 
-    boolean addIsVisible;
-    boolean refreshIsVisible;
-    boolean progressbarIsVisible;
-    String hello;
-    String quotationPhrase;
-    Quotation quotation;
+    boolean addIsVisible = false;
+    boolean refreshIsVisible = true;
+    String hello,language,httpMethod;
+    ProgressBar progressBar;
+    public TextView tvAuthorName,tvQuotation;
     QuotationRetrofitInterface retrofitInterface;
 
     @Override
@@ -44,28 +45,30 @@ public class QuotationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quotation);
 
-        if(savedInstanceState != null){
-            hello = savedInstanceState.getString(getString(R.string.key));
-            quotationPhrase = savedInstanceState.getString("phraseKey");
-            addIsVisible = savedInstanceState.getBoolean("visibleAdd");
-            refreshIsVisible = savedInstanceState.getBoolean("visibleRefresh");
-            progressbarIsVisible = savedInstanceState.getBoolean("visibleProgressBar");
-        }else{
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-            String username = prefs.getString(getString(R.string.key), getString(R.string.noRegisteredUser));
-            hello = getString(R.string.hello,username);
-        }
+        // Variables para los textView
+        tvQuotation = findViewById(R.id.tvQuot);
+        tvAuthorName = findViewById(R.id.tvAuthor);
+        progressBar = findViewById(R.id.progressBar);
 
-        TextView aux = findViewById(R.id.textView6);
-        aux.setText(hello);
-        hideAllOptions();
-
+        // Inicializacion Web Service con Retrofit
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.forismatic.com/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-
         retrofitInterface = retrofit.create(QuotationRetrofitInterface.class);
+
+
+        if(savedInstanceState != null){
+            tvQuotation.setText(savedInstanceState.getString("tvQuotation"));
+            tvAuthorName.setText(savedInstanceState.getString("tvAuthor"));
+            addIsVisible = savedInstanceState.getBoolean("visibleAdd");
+
+        }else{  // Para mostrar el "Hello ... "
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            String username = prefs.getString(getString(R.string.key), getString(R.string.noRegisteredUser));
+            hello = getString(R.string.hello,username);
+            tvQuotation.setText(hello);
+        }
 
     }
 
@@ -80,20 +83,15 @@ public class QuotationActivity extends AppCompatActivity {
         MenuItem refresh = menu.findItem(R.id.itemRefresh);
         refresh.setVisible(refreshIsVisible);
 
-        MenuItem progressBar = menu.findItem(R.id.progressBar);
-        progressBar.setVisible(refreshIsVisible);
-
         return true;
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(getString(R.string.key),hello);
-        outState.putString("phraseKey",quotationPhrase);
+        outState.putString("tvQuotation", String.valueOf(tvQuotation));
+        outState.putString("tvAuthor", String.valueOf(tvAuthorName));
         outState.putBoolean("visibleAdd",addIsVisible);
-        outState.putBoolean("visibleRefresh",refreshIsVisible);
-        outState.putBoolean("visibleProgressBar",progressbarIsVisible);
     }
 
     @Override
@@ -104,7 +102,8 @@ public class QuotationActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        QuotationDataBase.getInstance(QuotationActivity.this).quotationDAO().insertQuote(quotation);
+                        Quotation quotationToSave = new Quotation(String.valueOf(tvQuotation.getText()), String.valueOf(tvAuthorName.getText()));
+                        QuotationDataBase.getInstance(QuotationActivity.this).quotationDAO().insertQuote(quotationToSave);
                     }
                 }).start();
 
@@ -112,10 +111,23 @@ public class QuotationActivity extends AppCompatActivity {
                 invalidateOptionsMenu();
 
                 return true;
+
             case R.id.itemRefresh:
 
                 if(isConnected()){
-                    Call<Quotation> call = retrofitInterface.getCurrentQuotation("english");
+                    // Mostramos la Progress Bar
+                    showPrBar();
+
+                    // Obtenemos los parametros de lenguaje y metodo HTTP
+                    getParameters();
+
+                    // Realizamos llamada al Web Service
+                    Call<Quotation> call;
+                    if(httpMethod == "get"){
+                        call = retrofitInterface.getCurrentQuotation(language);
+                    }else{
+                        call = retrofitInterface.getCurrentQuotationPOST(language,"getQuote","json");
+                    }
 
                     call.enqueue(new Callback<Quotation>() {
                         @Override
@@ -125,56 +137,57 @@ public class QuotationActivity extends AppCompatActivity {
 
                         @Override
                         public void onFailure(Call<Quotation> call, Throwable t) {
-                            Toast.makeText(QuotationActivity.this, R.string.notFound,Toast.LENGTH_SHORT).show();
+                            displayQuotation(null);
                         }
                     });
                 }else{
                     Toast.makeText(QuotationActivity.this, R.string.connectionError,Toast.LENGTH_SHORT).show();
                 }
-
-                final TextView textView = findViewById(R.id.textView6);
-                quotationPhrase = "Cita " + ": " + quotation.getQuoteText() + " Autor " + ": " + quotation.quoteAuthor;
-                textView.setText(quotationPhrase);
-
                 return true;
+
             default:
                 return true;
         }
     }
 
-    public void displayQuotation(Quotation quot){
-        quotation.setQuoteText(quot.quoteText);
-        quotation.setQuoteAuthor(quot.quoteAuthor);
+    private void showPrBar(){
+        addIsVisible = false;
+        refreshIsVisible = false;
+        tvQuotation.setVisibility(View.INVISIBLE);
+        tvAuthorName.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+        invalidateOptionsMenu();
+    }
 
-        if(quot != null){
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Quotation aux = QuotationDataBase.getInstance(QuotationActivity.this).quotationDAO().getQuote(quotation.getQuoteText());
+    private void getParameters(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(aux == null){
-                                addIsVisible = true;
-                            }else addIsVisible = false;
+        // Usamos por defecto english y get
+        language = prefs.getString(getString(R.string.chooseLanguage),getString(R.string.en));
+        httpMethod = prefs.getString(getString(R.string.httpRequests),getString(R.string.get));
+    }
 
-                            progressbarIsVisible = false;
-                            invalidateOptionsMenu();
-                        }
-                    });
-                }
-            }).start();
+    public void setAddVisibility(boolean isSaved){
+        addIsVisible = isSaved;
+        invalidateOptionsMenu();
+    }
+
+    public void displayQuotation(Quotation quotation){
+
+        progressBar.setVisibility(View.INVISIBLE);
+        refreshIsVisible = true;
+        invalidateOptionsMenu();
+
+        if(quotation != null){
+            tvQuotation.setText(quotation.quoteText);
+            tvAuthorName.setText(quotation.quoteAuthor);
+            new QuotationThread(this).start();
+            tvQuotation.setVisibility(View.VISIBLE);
+            tvAuthorName.setVisibility(View.VISIBLE);
         }else{
             Toast.makeText(QuotationActivity.this, R.string.notFound, Toast.LENGTH_SHORT).show();
         }
-    }
 
-    public void hideAllOptions(){
-        addIsVisible = false;
-        refreshIsVisible = false;
-        progressbarIsVisible = true;
-        invalidateOptionsMenu();
     }
 
     public boolean isConnected(){
