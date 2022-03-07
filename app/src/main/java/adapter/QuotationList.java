@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-import lab.dadm.quotationshake.FavouriteActivity;
 import lab.dadm.quotationshake.R;
 import model.Quotation;
 

@@ -4,12 +4,16 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/layout-land/activity_dashboard.xml" value="0.30952380952380953" />
+        <entry key="app/src/main/res/layout/acitivity_dashboard.xml" value="0.365625" />
         <entry key="app/src/main/res/layout/activity_about.xml" value="0.3591485507246377" />
         <entry key="app/src/main/res/layout/activity_dashboard.xml" value="0.3591485507246377" />
         <entry key="app/src/main/res/layout/activity_favourite.xml" value="0.365625" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.2504528985507246" />
         <entry key="app/src/main/res/layout/activity_quotation.xml" value="0.3591485507246377" />
         <entry key="app/src/main/res/layout/activity_settings.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/fragment_about.xml" value="0.365625" />
+        <entry key="app/src/main/res/layout/fragment_favourite.xml" value="0.365625" />
+        <entry key="app/src/main/res/layout/fragment_quotation.xml" value="0.365625" />
         <entry key="app/src/main/res/layout/quotation_item.xml" value="0.365625" />
         <entry key="app/src/main/res/menu/favourite_actionbar.xml" value="0.365625" />
         <entry key="app/src/main/res/menu/quoation_actionbar.xml" value="0.365625" />

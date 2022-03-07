@@ -1,10 +1,7 @@
-package lab.dadm.quotationshake;
+package fragments;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.PreferenceManager;
+import static android.content.Context.CONNECTIVITY_SERVICE;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -12,16 +9,23 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageButton;
+import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
+
 import databases.QuotationDataBase;
+import lab.dadm.quotationshake.R;
 import model.Quotation;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -31,7 +35,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import thread.QuotationThread;
 import webservices.QuotationRetrofitInterface;
 
-public class QuotationActivity extends AppCompatActivity {
+public class QuotationFragment extends Fragment {
 
     boolean addIsVisible = false;
     boolean refreshIsVisible = true;
@@ -40,15 +44,15 @@ public class QuotationActivity extends AppCompatActivity {
     public TextView tvAuthorName,tvQuotation;
     QuotationRetrofitInterface retrofitInterface;
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_quotation);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_quotation,null);
 
         // Variables para los textView
-        tvQuotation = findViewById(R.id.tvQuot);
-        tvAuthorName = findViewById(R.id.tvAuthor);
-        progressBar = findViewById(R.id.progressBar);
+        tvQuotation = view.findViewById(R.id.tvQuot);
+        tvAuthorName = view.findViewById(R.id.tvAuthor);
+        progressBar = view.findViewById(R.id.progressBar);
 
         // Inicializacion Web Service con Retrofit
         Retrofit retrofit = new Retrofit.Builder()
@@ -64,17 +68,27 @@ public class QuotationActivity extends AppCompatActivity {
             addIsVisible = savedInstanceState.getBoolean("visibleAdd");
 
         }else{  // Para mostrar el "Hello ... "
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
             String username = prefs.getString(getString(R.string.key), getString(R.string.noRegisteredUser));
             hello = getString(R.string.hello,username);
             tvQuotation.setText(hello);
         }
 
+        return view;
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater = getMenuInflater();
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    public QuotationFragment(){
+
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.quoation_actionbar,menu);
 
         MenuItem add = menu.findItem(R.id.itemAdd);
@@ -82,12 +96,10 @@ public class QuotationActivity extends AppCompatActivity {
 
         MenuItem refresh = menu.findItem(R.id.itemRefresh);
         refresh.setVisible(refreshIsVisible);
-
-        return true;
     }
 
     @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("tvQuotation", String.valueOf(tvQuotation));
         outState.putString("tvAuthor", String.valueOf(tvAuthorName));
@@ -103,12 +115,12 @@ public class QuotationActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Quotation quotationToSave = new Quotation(String.valueOf(tvQuotation.getText()), String.valueOf(tvAuthorName.getText()));
-                        QuotationDataBase.getInstance(QuotationActivity.this).quotationDAO().insertQuote(quotationToSave);
+                        QuotationDataBase.getInstance(getContext()).quotationDAO().insertQuote(quotationToSave);
                     }
                 }).start();
 
                 addIsVisible = false;
-                invalidateOptionsMenu();
+                getActivity().invalidateOptionsMenu();
 
                 return true;
 
@@ -141,7 +153,7 @@ public class QuotationActivity extends AppCompatActivity {
                         }
                     });
                 }else{
-                    Toast.makeText(QuotationActivity.this, R.string.connectionError,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), R.string.connectionError,Toast.LENGTH_SHORT).show();
                 }
                 return true;
 
@@ -156,11 +168,11 @@ public class QuotationActivity extends AppCompatActivity {
         tvQuotation.setVisibility(View.INVISIBLE);
         tvAuthorName.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.VISIBLE);
-        invalidateOptionsMenu();
+        getActivity().invalidateOptionsMenu();
     }
 
     private void getParameters(){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
 
         // Usamos por defecto english y get
         language = prefs.getString(getString(R.string.chooseLanguage),getString(R.string.en));
@@ -169,14 +181,14 @@ public class QuotationActivity extends AppCompatActivity {
 
     public void setAddVisibility(boolean isSaved){
         addIsVisible = isSaved;
-        invalidateOptionsMenu();
+        getActivity().invalidateOptionsMenu();
     }
 
     public void displayQuotation(Quotation quotation){
 
         progressBar.setVisibility(View.INVISIBLE);
         refreshIsVisible = true;
-        invalidateOptionsMenu();
+        getActivity().invalidateOptionsMenu();
 
         if(quotation != null){
             tvQuotation.setText(quotation.quoteText);
@@ -185,7 +197,7 @@ public class QuotationActivity extends AppCompatActivity {
             tvQuotation.setVisibility(View.VISIBLE);
             tvAuthorName.setVisibility(View.VISIBLE);
         }else{
-            Toast.makeText(QuotationActivity.this, R.string.notFound, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.notFound, Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -193,7 +205,7 @@ public class QuotationActivity extends AppCompatActivity {
     public boolean isConnected(){
         boolean result = false;
 
-        ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        ConnectivityManager manager = (ConnectivityManager) getContext().getSystemService(CONNECTIVITY_SERVICE);
 
         if(Build.VERSION.SDK_INT > 22){
             final Network activeNetwork = manager.getActiveNetwork();

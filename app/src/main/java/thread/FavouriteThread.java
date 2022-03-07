@@ -3,24 +3,25 @@ package thread;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-import adapter.QuotationList;
 import databases.QuotationDataBase;
-import lab.dadm.quotationshake.FavouriteActivity;
+import fragments.FavouriteFragment;
 import model.Quotation;
 
 public class FavouriteThread extends Thread{
-    private final WeakReference<FavouriteActivity> reference;
+    private final WeakReference<FavouriteFragment> reference;
 
-    public FavouriteThread(FavouriteActivity favouriteActivity){
+    public FavouriteThread(FavouriteFragment favouriteFragment){
         super();
-        this.reference = new WeakReference<>(favouriteActivity);
+        this.reference = new WeakReference<>(favouriteFragment);
     }
 
     public void run(){
-        if(reference.get() != null){
-            List<Quotation> quotations = QuotationDataBase.getInstance(reference.get()).quotationDAO().getAllQuotations();
+        FavouriteFragment fragment = reference.get();
 
-            reference.get().runOnUiThread(new Runnable() {
+        if(reference.get() != null){
+            List<Quotation> quotations = QuotationDataBase.getInstance(fragment.getContext()).quotationDAO().getAllQuotations();
+
+            fragment.getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     reference.get().addFavList(quotations);

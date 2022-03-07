@@ -21,26 +21,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.QuotationShake">
         <activity
-            android:name=".QuotationActivity"
-            android:label="@string/getQuotations"
-            android:exported="false"
-            android:parentActivityName=".DashboardActivity" />
-        <activity
-            android:name=".FavouriteActivity"
-            android:exported="false"
-            android:label="@string/favQuotations"
-            android:parentActivityName=".DashboardActivity"/>
-        <activity
-            android:name=".SettingsActivity"
-            android:exported="false"
-            android:label="@string/settings"
-            android:parentActivityName=".DashboardActivity"/>
-        <activity
-            android:name=".AboutActivity"
-            android:label="about"
-            android:exported="false"
-            android:parentActivityName=".DashboardActivity"/>
-        <activity
             android:name=".DashboardActivity"
             android:label="quotationShake"
             android:exported="true">
