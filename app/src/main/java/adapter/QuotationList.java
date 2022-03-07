@@ -16,12 +16,10 @@ import model.Quotation;
 public class QuotationList extends RecyclerView.Adapter<QuotationList.ViewHolder> {
     private List<Quotation> listQuotation;
     private OnItemClickListener item;
-    private OnItemLongClickListener itemLongClickListener;
     
-    public QuotationList(List<Quotation> list, OnItemClickListener itemClickListener, OnItemLongClickListener itemLongClickList){
+    public QuotationList(List<Quotation> list, OnItemClickListener itemClickListener){
         listQuotation = list;
         item = itemClickListener;
-        itemLongClickListener = itemLongClickList;
     }
 
     @NonNull
@@ -74,14 +72,6 @@ public class QuotationList extends RecyclerView.Adapter<QuotationList.ViewHolder
                 @Override
                 public void onClick(View view) {
                     item.onItemClick(listQuotation.get(getAdapterPosition()));
-                }
-            });
-
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    itemLongClickListener.onItemLongClick(getAdapterPosition());
-                    return true;
                 }
             });
 

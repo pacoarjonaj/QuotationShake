@@ -23,6 +23,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import databases.QuotationDataBase;
 import lab.dadm.quotationshake.R;
@@ -37,12 +40,13 @@ import webservices.QuotationRetrofitInterface;
 
 public class QuotationFragment extends Fragment {
 
-    boolean addIsVisible = false;
     boolean refreshIsVisible = true;
     String hello,language,httpMethod;
     ProgressBar progressBar;
     public TextView tvAuthorName,tvQuotation;
     QuotationRetrofitInterface retrofitInterface;
+    SwipeRefreshLayout swipeRefreshLayout;
+    FloatingActionButton floatingActionButton;
 
     @Nullable
     @Override
@@ -52,7 +56,6 @@ public class QuotationFragment extends Fragment {
         // Variables para los textView
         tvQuotation = view.findViewById(R.id.tvQuot);
         tvAuthorName = view.findViewById(R.id.tvAuthor);
-        progressBar = view.findViewById(R.id.progressBar);
 
         // Inicializacion Web Service con Retrofit
         Retrofit retrofit = new Retrofit.Builder()
@@ -61,17 +64,44 @@ public class QuotationFragment extends Fragment {
                 .build();
         retrofitInterface = retrofit.create(QuotationRetrofitInterface.class);
 
+        // Referencia al SwipeRefreshLayout
+        swipeRefreshLayout = view.findViewById(R.id.srLayout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getQuotationSwipeListener();
+            }
+        });
+
+        // Referencia Floating button
+        floatingActionButton = view.findViewById(R.id.floatingActionBn);
+        floatingActionButton.setOnClickListener(new FloatingActionButton.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Quotation quotationToSave = new Quotation(String.valueOf(tvQuotation.getText()), String.valueOf(tvAuthorName.getText()));
+                        QuotationDataBase.getInstance(getContext()).quotationDAO().insertQuote(quotationToSave);
+                    }
+                }).start();
+
+                floatingActionButton.setVisibility(View.INVISIBLE);
+                tvAuthorName.setVisibility(View.INVISIBLE);
+                getActivity().invalidateOptionsMenu();
+            }
+        });
+
 
         if(savedInstanceState != null){
             tvQuotation.setText(savedInstanceState.getString("tvQuotation"));
             tvAuthorName.setText(savedInstanceState.getString("tvAuthor"));
-            addIsVisible = savedInstanceState.getBoolean("visibleAdd");
-
         }else{  // Para mostrar el "Hello ... "
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
             String username = prefs.getString(getString(R.string.key), getString(R.string.noRegisteredUser));
             hello = getString(R.string.hello,username);
             tvQuotation.setText(hello);
+            floatingActionButton.setVisibility(View.INVISIBLE);
         }
 
         return view;
@@ -91,9 +121,6 @@ public class QuotationFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.quoation_actionbar,menu);
 
-        MenuItem add = menu.findItem(R.id.itemAdd);
-        add.setVisible(addIsVisible);
-
         MenuItem refresh = menu.findItem(R.id.itemRefresh);
         refresh.setVisible(refreshIsVisible);
     }
@@ -103,58 +130,13 @@ public class QuotationFragment extends Fragment {
         super.onSaveInstanceState(outState);
         outState.putString("tvQuotation", String.valueOf(tvQuotation));
         outState.putString("tvAuthor", String.valueOf(tvAuthorName));
-        outState.putBoolean("visibleAdd",addIsVisible);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()){
-            case R.id.itemAdd:
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Quotation quotationToSave = new Quotation(String.valueOf(tvQuotation.getText()), String.valueOf(tvAuthorName.getText()));
-                        QuotationDataBase.getInstance(getContext()).quotationDAO().insertQuote(quotationToSave);
-                    }
-                }).start();
-
-                addIsVisible = false;
-                getActivity().invalidateOptionsMenu();
-
-                return true;
-
             case R.id.itemRefresh:
-
-                if(isConnected()){
-                    // Mostramos la Progress Bar
-                    showPrBar();
-
-                    // Obtenemos los parametros de lenguaje y metodo HTTP
-                    getParameters();
-
-                    // Realizamos llamada al Web Service
-                    Call<Quotation> call;
-                    if(httpMethod == "get"){
-                        call = retrofitInterface.getCurrentQuotation(language);
-                    }else{
-                        call = retrofitInterface.getCurrentQuotationPOST(language,"getQuote","json");
-                    }
-
-                    call.enqueue(new Callback<Quotation>() {
-                        @Override
-                        public void onResponse(Call<Quotation> call, Response<Quotation> response) {
-                            displayQuotation(response.body());
-                        }
-
-                        @Override
-                        public void onFailure(Call<Quotation> call, Throwable t) {
-                            displayQuotation(null);
-                        }
-                    });
-                }else{
-                    Toast.makeText(getContext(), R.string.connectionError,Toast.LENGTH_SHORT).show();
-                }
+                getQuotationSwipeListener();
                 return true;
 
             default:
@@ -162,12 +144,48 @@ public class QuotationFragment extends Fragment {
         }
     }
 
+    private void getQuotationSwipeListener(){
+
+        if(isConnected()){
+            // Mostramos la Progress Bar
+            showPrBar();
+
+            // Obtenemos los parametros de lenguaje y metodo HTTP
+            getParameters();
+
+            // Realizamos llamada al Web Service
+            Call<Quotation> call;
+            if(httpMethod == "get"){
+                call = retrofitInterface.getCurrentQuotation(language);
+            }else{
+                call = retrofitInterface.getCurrentQuotationPOST(language,"getQuote","json");
+            }
+
+            call.enqueue(new Callback<Quotation>() {
+                @Override
+                public void onResponse(Call<Quotation> call, Response<Quotation> response) {
+                    displayQuotation(response.body());
+                }
+
+                @Override
+                public void onFailure(Call<Quotation> call, Throwable t) {
+                    displayQuotation(null);
+                }
+            });
+        }else{
+            Toast.makeText(getContext(), R.string.connectionError,Toast.LENGTH_SHORT).show();
+            swipeRefreshLayout.setRefreshing(false);
+            tvAuthorName.setVisibility(View.INVISIBLE);
+        }
+
+    }
+
     private void showPrBar(){
-        addIsVisible = false;
+        floatingActionButton.setVisibility(View.INVISIBLE);
         refreshIsVisible = false;
         tvQuotation.setVisibility(View.INVISIBLE);
         tvAuthorName.setVisibility(View.INVISIBLE);
-        progressBar.setVisibility(View.VISIBLE);
+        swipeRefreshLayout.setRefreshing(true);
         getActivity().invalidateOptionsMenu();
     }
 
@@ -180,13 +198,16 @@ public class QuotationFragment extends Fragment {
     }
 
     public void setAddVisibility(boolean isSaved){
-        addIsVisible = isSaved;
-        getActivity().invalidateOptionsMenu();
+
+        if(isSaved){
+            floatingActionButton.setVisibility(View.VISIBLE);
+        }else floatingActionButton.setVisibility(View.INVISIBLE);
+
     }
 
     public void displayQuotation(Quotation quotation){
 
-        progressBar.setVisibility(View.INVISIBLE);
+        swipeRefreshLayout.setRefreshing(false);
         refreshIsVisible = true;
         getActivity().invalidateOptionsMenu();
 

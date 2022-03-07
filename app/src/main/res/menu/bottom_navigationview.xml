@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/itemNavGet"
+        android:icon="@drawable/fotocara"
+        android:title="@string/getQuotations"/>
+
+    <item
+        android:id="@+id/itemNavFav"
+        android:icon="@drawable/fotocara"
+        android:title="@string/favQuotations"/>
+
+    <item
+        android:id="@+id/itemNavSet"
+        android:icon="@drawable/fotocara"
+        android:title="@string/settings"/>
+
+    <item
+        android:id="@+id/itemNavAbout"
+        android:icon="@drawable/fotocara"
+        android:title="@string/about"/>
+
+</menu>

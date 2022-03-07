@@ -2,6 +2,7 @@ package fragments;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.drm.DrmStore;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -16,7 +17,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,6 +28,7 @@ import java.util.List;
 
 import adapter.QuotationList;
 import databases.QuotationDataBase;
+import kotlin.reflect.KFunction;
 import lab.dadm.quotationshake.R;
 import model.Quotation;
 import thread.FavouriteThread;
@@ -59,72 +63,97 @@ public class FavouriteFragment extends Fragment {
             }
         };
 
-        // Dialog
-        QuotationList.OnItemLongClickListener longListener = new QuotationList.OnItemLongClickListener() {
-            @Override
-            public void onItemLongClick(int position) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setMessage("Are you sure that you want to delete this quotation?");
-                builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                QuotationDataBase.getInstance(getContext()).quotationDAO().deleteQuote(adapter.getQuoation(position));
-
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        adapter.removeListElement(position);
-                                        if(adapter.getItemCount() == 0){
-                                            isVisible = false;
-                                        }else isVisible = true;
-
-                                        getActivity().invalidateOptionsMenu();
-                                    }
-                                });
-
-                            }
-                        }).start();
-                    }
-                });
-
-                builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                    }
-                });
-
-                builder.create().show();
-            }
-        };
 
 
         // Recycler
-        RecyclerView recycler = view.findViewById(R.id.recyclerViewFav);
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerViewFav);
         RecyclerView.LayoutManager manager = new LinearLayoutManager(getContext(),LinearLayoutManager.VERTICAL,false);
         RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(getContext(),DividerItemDecoration.VERTICAL);
 
-        recycler.setLayoutManager(manager);
-        recycler.addItemDecoration(itemDecoration);
+        recyclerView.setLayoutManager(manager);
+        recyclerView.addItemDecoration(itemDecoration);
 
         List<Quotation> listQuotations = new ArrayList<>();
-        adapter = new QuotationList(listQuotations,listener,longListener);
+        adapter = new QuotationList(listQuotations,listener);
         isVisible = adapter.getItemCount() > 0;
-        recycler.setAdapter(adapter);
+        recyclerView.setAdapter(adapter);
 
+        // ItemTouchHelper
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.Callback() {
+            @Override
+            public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+                return makeFlag(ItemTouchHelper.ACTION_STATE_IDLE,ItemTouchHelper.RIGHT) | makeFlag(ItemTouchHelper.ACTION_STATE_SWIPE,ItemTouchHelper.RIGHT);
+            }
+
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        QuotationDataBase.getInstance(getContext()).quotationDAO().deleteQuote(adapter.getQuoation(position));
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                adapter.removeListElement(position);
+                                if(adapter.getItemCount() == 0){
+                                    isVisible = false;
+                                }else isVisible = true;
+
+                                getActivity().invalidateOptionsMenu();
+                            }
+                        });
+                    }
+                }).start();
+            }
+
+            @Override
+            public boolean isItemViewSwipeEnabled() {
+                return true;
+            }
+
+            @Override
+            public boolean isLongPressDragEnabled() {
+                return false;
+            }
+        });
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         return view;
     }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        FragmentResultListener fragmentResultListener = (new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                adapter.clearAllElements();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        QuotationDataBase.getInstance(getContext()).quotationDAO().deleteAllQuote();
+                    }
+                }).start();
+
+                isVisible = false;
+                getActivity().invalidateOptionsMenu();
+            }
+        });
+
+      getChildFragmentManager().setFragmentResultListener("remove_all",this,fragmentResultListener);
     }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
@@ -139,18 +168,8 @@ public class FavouriteFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()){
             case R.id.itemClearAll:
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        QuotationDataBase.getInstance(getContext()).quotationDAO().deleteAllQuote();
-                    }
-                }).start();
-
-                adapter.clearAllElements();
-                isVisible = false;
-                getActivity().invalidateOptionsMenu();
-
+                DialogClassFragment dialogClassFragment = new DialogClassFragment();
+                dialogClassFragment.show(getChildFragmentManager(),null);
                 return true;
             default:
                 return true;

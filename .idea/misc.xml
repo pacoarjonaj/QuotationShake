@@ -3,6 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.229" />
+        <entry key="app/src/main/res/drawable/icon_add_background.xml" value="0.229" />
+        <entry key="app/src/main/res/drawable/icon_perfil_background.xml" value="0.229" />
+        <entry key="app/src/main/res/drawable/userIcon_background.xml" value="0.229" />
         <entry key="app/src/main/res/layout-land/activity_dashboard.xml" value="0.30952380952380953" />
         <entry key="app/src/main/res/layout/acitivity_dashboard.xml" value="0.365625" />
         <entry key="app/src/main/res/layout/activity_about.xml" value="0.3591485507246377" />
@@ -15,8 +19,10 @@
         <entry key="app/src/main/res/layout/fragment_favourite.xml" value="0.365625" />
         <entry key="app/src/main/res/layout/fragment_quotation.xml" value="0.365625" />
         <entry key="app/src/main/res/layout/quotation_item.xml" value="0.365625" />
+        <entry key="app/src/main/res/menu/bottom_navigationview.xml" value="0.365625" />
         <entry key="app/src/main/res/menu/favourite_actionbar.xml" value="0.365625" />
         <entry key="app/src/main/res/menu/quoation_actionbar.xml" value="0.365625" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/icon_add.xml" value="0.197" />
         <entry key="app/src/main/res/xml/preference_settings.xml" value="0.365625" />
       </map>
     </option>

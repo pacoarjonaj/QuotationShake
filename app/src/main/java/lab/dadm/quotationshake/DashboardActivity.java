@@ -1,5 +1,6 @@
 package lab.dadm.quotationshake;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -7,7 +8,11 @@ import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.Button;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 
 import fragments.AboutFragment;
 import fragments.FavouriteFragment;
@@ -23,37 +28,52 @@ public class DashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.acitivity_dashboard);
 
-        final Button bGetQuo = findViewById(R.id.buttonGetQuo);
-        bGetQuo.setOnClickListener(v -> {
+        final BottomNavigationView bnView = findViewById(R.id.btnView);
+        bnView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                return itemSelected(item.getItemId());
+            }
+        });
+
+        if(savedInstanceState == null){
             getSupportActionBar().setTitle(getString(R.string.getQuotations));
             fragmentClass = QuotationFragment.class;
             showFragment();
-        });
-
-        final Button bFavQuo = findViewById(R.id.buttonFavQuo);
-        bFavQuo.setOnClickListener(v -> {
-            getSupportActionBar().setTitle(getString(R.string.favQuotations));
-            fragmentClass = FavouriteFragment.class;
-            showFragment();
-        });
-
-        final Button bSett = findViewById(R.id.buttonSettings);
-        bSett.setOnClickListener(v -> {
-            getSupportActionBar().setTitle(getString(R.string.settings));
-            fragmentClass = SettingsFragment.class;
-            showFragment();
-        });
-
-        final Button bAbout = findViewById(R.id.buttonAbout);
-        bAbout.setOnClickListener(v -> {
-            getSupportActionBar().setTitle(getString(R.string.about));
-            fragmentClass = AboutFragment.class;
-            showFragment();
-        });
+        }
 
     }
 
+    private boolean itemSelected(int itemId){
+        switch (itemId){
+            case R.id.itemNavGet:
+                getSupportActionBar().setTitle(getString(R.string.getQuotations));
+                fragmentClass = QuotationFragment.class;
+                break;
+            case R.id.itemNavFav:
+                getSupportActionBar().setTitle(getString(R.string.favQuotations));
+                fragmentClass = FavouriteFragment.class;
+                break;
+            case R.id.itemNavSet:
+                getSupportActionBar().setTitle(getString(R.string.settings));
+                fragmentClass = SettingsFragment.class;
+                break;
+            case R.id.itemNavAbout:
+                getSupportActionBar().setTitle(getString(R.string.about));
+                fragmentClass = AboutFragment.class;
+                break;
+        }
+        showFragment();
+
+        return true;
+    }
+
+
     private void showFragment(){
-        getSupportFragmentManager().beginTransaction().setReorderingAllowed(true).replace(R.id.idGeneralFragment,fragmentClass,null).commit();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setReorderingAllowed(true)
+                .replace(R.id.idGeneralFragment,fragmentClass,null)
+                .commit();
     }
 }
